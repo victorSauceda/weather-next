@@ -1,24 +1,12 @@
-"use client";
 import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import SignInForm from '../../components/SignInForm';
+import { GetServerSideProps } from 'next';
 
 interface SignInProps {
-  providers: Record<string, ClientSafeProvider> | null;
+  providers: Record<string, ClientSafeProvider>;
 }
 
-export default function SignIn() {
-  const [providers, setProviders] = useState<SignInProps['providers']>(null);
-
-  useEffect(() => {
-    const fetchProviders = async () => {
-      const res = await getProviders();
-      setProviders(res);
-    };
-    fetchProviders();
-  }, []);
-
-  if (!providers) return <p>Loading...</p>;
-
+export default function SignIn({ providers }: SignInProps) {
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-100'>
       {Object.values(providers).map((provider) => (
@@ -26,6 +14,13 @@ export default function SignIn() {
           Sign in with {provider.name}
         </button>
       ))}
+      {/* Sign In Form for email/password authentication */}
+      <SignInForm />
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  const providers = await getProviders();
+  return { props: { providers } };
+};
