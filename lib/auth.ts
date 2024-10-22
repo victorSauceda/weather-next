@@ -1,32 +1,55 @@
 import { NextAuthOptions } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
-import clientPromise from '@/lib/mongodb'; // Use the MongoClient, not Mongoose
+import clientPromise from '@/lib/mongodb'; // MongoDB Client
+import bcrypt from 'bcrypt';
+import User from '@/models/User'; // Mongoose User model
 
 const authOptions: NextAuthOptions = {
-  // Use MongoDB Adapter for session storage
   adapter: MongoDBAdapter(clientPromise),
 
-  // Use server-side sessions (database-backed sessions)
   session: {
-    strategy: 'database', // Use server-side sessions stored in the database
+    strategy: 'database', // Use MongoDB-backed sessions
   },
 
-  // Google OAuth provider
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        const { email, password } = credentials ?? {};
+
+        if (!email || !password) {
+          throw new Error('Missing email or password');
+        }
+
+        // Connect to MongoDB and find the user by email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+          throw new Error('No user found with this email');
+        }
+
+        // Compare entered password with the stored hashed password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          throw new Error('Invalid email or password');
+        }
+
+        // Return user object (omit sensitive information)
+        return { id: user._id.toString(), email: user.email, name: user.name };
+      }
     }),
   ],
 
-  // Redirect to custom sign-in page
   pages: {
-    signIn: '/signin',
+    signIn: '/signin', // Custom sign-in page
   },
 
-  // Secret for encrypting tokens and signing cookies (required)
-  secret: process.env.SECRET,
+  secret: process.env.SECRET, // For signing tokens
 };
 
 export default authOptions;
