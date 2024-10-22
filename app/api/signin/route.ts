@@ -2,8 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import  {compare} from 'bcryptjs';
-import dbConnect from '@/lib/mongoose'; // Adjust the path as necessary
-import User, { IUser } from '@/models/User'; // Assuming you have an IUser interface
+import dbConnect from '../../../lib/mongoose'; // Adjust the path as necessary
+import User, { IUser } from '../../../models/User'; // Assuming you have an IUser interface
 import { signIn } from 'next-auth/react';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
