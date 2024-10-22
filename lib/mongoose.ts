@@ -1,7 +1,7 @@
 'use client';
 import mongoose from 'mongoose';
 
-const MONGODB_URI: string = process.env.NEXT_PUBLIC_MONGO_DB_URI || '';
+const MONGODB_URI: string = process.env.MONGO_DB_URI || '';
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
