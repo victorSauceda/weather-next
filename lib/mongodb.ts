@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-const uri: string = process.env.MONGODB_URI || ''; // MongoDB connection string
+const uri: string = process.env.MONGO_DB_URI || ''; // MongoDB connection string
 
 if (!uri) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
