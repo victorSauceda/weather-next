@@ -1,42 +1,46 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
-import dbConnect from '@/lib/mongoose'; // Adjust the path if needed
-import User, { IUser } from '@/models/User'; // Assuming IUser is an interface for User model
+import bcrypt from 'bcryptjs';
+import dbConnect from '@/lib/mongoose'; // Adjust the path as necessary
+import User, { IUser } from '@/models/User'; // Assuming you have an IUser interface
+import { signIn } from 'next-auth/react';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  await dbConnect();
+
   try {
-    await dbConnect();
+    const { email, password }: { email: string; password: string } = await req.json(); // Parse the request body
 
-    // Parse request body and extract email and password
-    const { email, password }: { email: string; password: string } = await req.json();
-
-    console.log('Received signup request for:', email);
-
-    // Check if the user already exists
-    const existingUser: IUser | null = await User.findOne({ email });
-    if (existingUser) {
-      console.log('User already exists:', email);
-      return NextResponse.json({ message: 'User already exists' }, { status: 400 });
+    // Check if the user exists
+    const user: IUser | null = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Hash the password before saving the user
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds for bcrypt
+    // Check if the user's email has been verified
+    if (!user.emailVerified) {
+      return NextResponse.json({ message: 'Please verify your email before signing in.' }, { status: 403 });
+    }
 
-    // Create a new user object with proper typing
-    const newUser: IUser = await User.create({
-      email,
-      password: hashedPassword, // Save the hashed password
-      emailVerified: false,
-    });
+    // Compare the provided password with the stored hashed password
+    const isPasswordValid: boolean = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+    }
 
-    console.log('New user created:', newUser);
+    // Proceed to sign in the user using NextAuth credentials
+    const result = await signIn('credentials', { redirect: false, email, password });
+    
+    if (result?.error) {
+      return NextResponse.json({ message: result.error }, { status: 401 });
+    }
 
-    return NextResponse.json({ message: 'User created successfully!' }, { status: 201 });
+    // Successful sign-in
+    return NextResponse.json({ message: 'Sign-in successful!' }, { status: 200 });
 
   } catch (error) {
-    console.error('Error occurred during signup:', error);
-    return NextResponse.json({ message: 'Signup failed. Please try again.' }, { status: 500 });
+    console.error('Error during sign-in:', error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
