@@ -30,6 +30,7 @@ export default function SignUp() {
         body: JSON.stringify({ email, password }),
       });
 
+
       if (res.ok) {
         // Show the email sent message for 3 seconds
         console.log('Signup successful, redirecting...');
