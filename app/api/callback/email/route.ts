@@ -1,8 +1,8 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongoose'; // Adjust the path if necessary
-import User from '@/models/User'; // Adjust the path if necessary
+import dbConnect from '../../../../lib/mongoose'; // Adjust the path if necessary
+import User from '../../../../models/User'; // Adjust the path if necessary
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {

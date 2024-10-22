@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import User from '@/models/User'; // Mongoose User model
+import User from '../models/User'; // Mongoose User model
 
 // Extend the Session and User types to include 'id'
 declare module 'next-auth' {

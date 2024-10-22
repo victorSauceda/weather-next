@@ -2,8 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import * as bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
-import dbConnect from '@/lib/mongoose'; // Adjust the path if needed
-import User, { IUser } from '@/models/User'; // Assuming IUser is an interface for User model
+import dbConnect from '../../../lib/mongoose'; // Adjust the path if needed
+import User, { IUser } from '../../../models/User'; // Assuming IUser is an interface for User model
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {

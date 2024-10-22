@@ -25,4 +25,5 @@ export const UserSchema: Schema<IUser> = new Schema({
 });
 
 // Export the User model, handling the case where the model is already compiled
-export default models.User || model<IUser>('User', UserSchema);
+const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export default User;
