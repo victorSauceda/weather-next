@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import AutocompleteSearch, { City } from '../components/AutocompleteSearch'; // Import City interface from AutocompleteSearch
-import Link from 'next/link';
+import Link from 'next/link'; 
 
 export default function Dashboard() {
   const { data: session } = useSession();
