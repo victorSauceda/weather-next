@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/router'; // For programmatic navigation
+import { useRouter } from 'next/navigation'; // For programmatic navigation
 
 export default function SignUp() {
   const [email, setEmail] = useState<string>('');
