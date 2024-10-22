@@ -3,9 +3,11 @@
 import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import SignInForm from '../../components/SignInForm';
+import { useRouter } from 'next/router'; // Import router for navigation
 
 export default function SignIn() {
   const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
+  const router = useRouter(); // Initialize Next.js router
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -20,6 +22,10 @@ export default function SignIn() {
     signIn(providerId, { callbackUrl: '/dashboard' });
   };
 
+  const handleSignUp = () => {
+    router.push('/auth/signup'); // Redirect to sign-up page
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8 px-4">
       <div className="w-full max-w-md space-y-8">
@@ -27,6 +33,19 @@ export default function SignIn() {
           <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Sign in to your account</h2>
           {/* Sign In Form for email/password authentication */}
           <SignInForm />
+
+          {/* Sign Up Link */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <button
+                onClick={handleSignUp}
+                className="text-blue-600 hover:underline"
+              >
+                Sign up here
+              </button>
+            </p>
+          </div>
         </div>
 
         {/* OAuth providers */}
