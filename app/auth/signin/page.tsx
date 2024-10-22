@@ -7,14 +7,15 @@ import SignInForm from '../../components/SignInForm';
 export default function SignIn() {
   const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
 
-  useEffect(() => {
-    const fetchProviders = async () => {
-      const res = await getProviders();
-      setProviders(res);
-    };
+useEffect(() => {
+  const fetchProviders = async () => {
+    const res = await getProviders();
+    console.log('Providers:', res); // Log the providers to check
+    setProviders(res);
+  };
 
-    fetchProviders();
-  }, []);
+  fetchProviders();
+}, []);
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-100'>
