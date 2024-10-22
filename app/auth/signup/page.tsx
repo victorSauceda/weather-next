@@ -1,92 +1,104 @@
-'use server';
+'use client';
 
-import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
-import dbConnect from '@/lib/mongoose'; // Adjust the path if needed
-import User, { IUser } from '@/models/User'; // Assuming IUser is an interface for User model
-import sgMail from '@sendgrid/mail';
-import { v4 as uuidv4 } from 'uuid'; // Import UUID package
+import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // For programmatic navigation
 
-// Ensure environment variables are defined
-const sendgridApiKey: string = process.env.SENDGRID_API_KEY || '';
-if (!sendgridApiKey) {
-  throw new Error('SENDGRID_API_KEY is not defined');
-}
-sgMail.setApiKey(sendgridApiKey);
+export default function SignUp() {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState<boolean>(false); // Track if email was sent
+  const router = useRouter(); // Hook for navigation
 
-const fromEmail: string = process.env.EMAIL_FROM || '';
-if (!fromEmail) {
-  throw new Error('EMAIL_FROM is not defined');
-}
+  // Function to handle sign-up form submission
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null); // Clear previous errors
 
-const nextAuthUrl: string = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Use default for local dev
-
-// Helper function to set token expiration time (15 minutes from now)
-function getTokenExpiry(minutes: number = 15): Date {
-  const now = new Date();
-  return new Date(now.getTime() + minutes * 60000); // Add minutes to current time
-}
-
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  try {
-    await dbConnect();
-
-    // Parse request body and extract email and password
-    const { email, password }: { email: string; password: string } = await req.json();
-
-    console.log('Received signup request for:', email);
-
-    // Check if the user already exists
-    const existingUser: IUser | null = await User.findOne({ email });
-    if (existingUser) {
-      console.log('User already exists:', email);
-      return NextResponse.json({ message: 'User already exists' }, { status: 400 });
+    if (password !== confirmPassword) {
+      // Check if passwords match
+      setError('Passwords do not match');
+      return;
     }
-
-    // Generate a unique token for the magic link using UUID
-    const token: string = uuidv4(); // Generate a UUID v4 token
-
-    // Set the token expiration (e.g., valid for 15 minutes)
-    const tokenExpiry: Date = getTokenExpiry(15); // Expiry set to 15 minutes
-
-    // Hash the password before saving the user
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds for bcrypt
-    console.log('Password hashed successfully');
-
-    // Create a new user object with proper typing
-    const newUser: IUser = await User.create({
-      email,
-      password: hashedPassword, // Save the hashed password
-      emailVerified: false,
-      token,
-      tokenExpiry,
-    });
-
-    console.log('New user created:', newUser);
-
-    // Create magic link URL (with the generated token)
-    const magicLinkUrl: string = `${nextAuthUrl}/api/callback/email?token=${token}&email=${encodeURIComponent(email)}`;
-
-    // Send magic link via SendGrid
-    const msg = {
-      to: email, // User's email
-      from: fromEmail, // Verified SendGrid sender
-      subject: 'Verify your email to complete registration',
-      text: `Click the following link to verify your email: ${magicLinkUrl}`,
-      html: `<p>Click the following link to verify your email: <a href="${magicLinkUrl}">Verify Email</a></p>`,
-    };
 
     try {
-      await sgMail.send(msg);
-      console.log('Verification email sent to:', email);
-      return NextResponse.json({ message: 'User created and verification email sent!' }, { status: 201 });
-    } catch (error) {
-      console.error('Error sending verification email:', error);
-      return NextResponse.json({ message: 'Failed to send verification email' }, { status: 500 });
-    }
+      console.log('Submitting signup request:', { email, password });
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-  } catch (error) {
-    console.error('Error occurred during signup:', error);
-    return NextResponse.json({ message: 'Signup failed. Please try again.' }, { status: 500 });
+      if (res.ok) {
+        // Show the email sent message for 3 seconds
+        console.log('Signup successful, redirecting...');
+        setEmailSent(true);
+        setTimeout(() => {
+          // Redirect to login after 3 seconds
+          router.push('/signin');
+        }, 3000); // 3-second delay
+      } else {
+        // Fetch the error message and display it
+        const data = await res.json();
+        console.error('Signup failed:', data);
+        setError(data.message || 'Failed to sign up. Please try again.');
+      }
+    } catch (err: any) {
+      console.error('Unexpected error during signup:', err); // Log the actual error
+      setError('Failed to sign up. Please try again.');
+    }
+  };
+
+  if (emailSent) {
+    // Show success message when email is sent
+    return (
+      <div className='min-h-screen text-black flex flex-col items-center justify-center bg-gray-100'>
+        <h1 className='text-4xl mb-6'>Sign Up</h1>
+        <p className='text-green-500 mb-6'>
+          An email was sent to the email you provided. Redirecting to login...
+        </p>
+      </div>
+    );
   }
+
+  return (
+    <div className='min-h-screen text-black flex flex-col items-center justify-center bg-gray-100'>
+      <h1 className='text-4xl mb-6'>Sign Up</h1>
+      <form onSubmit={handleSignUp} className='w-full max-w-sm'>
+        <input
+          type='email'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder='Email'
+          required
+          className='mb-4 p-2 w-full border rounded-md'
+        />
+        <input
+          type='password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder='Password'
+          required
+          className='mb-4 p-2 w-full border rounded-md'
+        />
+        <input
+          type='password'
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder='Confirm Password'
+          required
+          className='mb-4 p-2 w-full border rounded-md'
+        />
+        {error && <p className='text-red-500 mb-4'>{error}</p>}
+        <button type='submit' className='w-full p-2 bg-blue-600 text-white rounded-md'>
+          Sign Up
+        </button>
+      </form>
+      <p className='mt-4'>Already have an account?</p>
+      <a href='/signin' className='text-blue-500 hover:underline'>
+        Sign In
+      </a>
+    </div>
+  );
 }
