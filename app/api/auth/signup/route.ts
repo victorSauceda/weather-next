@@ -58,7 +58,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   });
 
   // Create magic link URL (with the generated token)
-  const magicLinkUrl: string = `${nextAuthUrl}/api/auth/callback/email?token=${token}&email=${encodeURIComponent(email)}`;
+  const magicLinkUrl: string = `${nextAuthUrl}/api/callback/email?token=${token}&email=${encodeURIComponent(email)}`;
 
   // Send magic link via SendGrid
   const msg = {
