@@ -1,13 +1,13 @@
-"use client";
+"use client"; // Make sure this is at the top
 
 import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import SignInForm from '../../components/SignInForm';
-import { useRouter } from 'next/router'; // Import router for navigation
+import { useRouter } from 'next/navigation'; // Import useRouter from 'next/navigation'
 
 export default function SignIn() {
   const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
-  const router = useRouter(); // Initialize Next.js router
+  const router = useRouter(); // Use the new router from 'next/navigation'
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -23,7 +23,7 @@ export default function SignIn() {
   };
 
   const handleSignUp = () => {
-    router.push('/auth/signup'); // Redirect to sign-up page
+    router.push('/auth/signup'); // Redirect to sign-up page using the new router
   };
 
   return (

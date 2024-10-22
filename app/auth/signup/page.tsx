@@ -33,7 +33,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-center bg-gray-100'>
+    <div className='min-h-screen text-black flex flex-col items-center justify-center bg-gray-100'>
       <h1 className='text-4xl mb-6'>Sign Up</h1>
       <form onSubmit={handleSignUp} className='w-full max-w-sm'>
         <input
