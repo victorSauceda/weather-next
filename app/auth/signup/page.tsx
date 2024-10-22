@@ -97,7 +97,7 @@ export default function SignUp() {
         </button>
       </form>
       <p className='mt-4'>Already have an account?</p>
-      <a href='/signin' className='text-blue-500 hover:underline'>
+      <a href='/sign-in' className='text-blue-500 hover:underline'>
         Sign In
       </a>
     </div>
