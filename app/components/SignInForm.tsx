@@ -1,17 +1,30 @@
 'use client';
+
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 
 export default function SignInForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string|null>(null);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await signIn('credentials', { redirect: false, email, password });
+
+    // Use NextAuth's signIn function to authenticate with credentials
+    const res = await signIn('credentials', {
+      redirect: false,
+      email,
+      password
+    });
+
     if (res?.error) {
+      // Show error message if authentication failed
       setError('Invalid email or password');
+    } else {
+      // Redirect to dashboard after successful sign-in
+      window.location.href = '/dashboard';
     }
   };
 
