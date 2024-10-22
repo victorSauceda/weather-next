@@ -1,5 +1,3 @@
-'use client';
-
 import mongoose, { Schema, Document, model, models, Types } from 'mongoose';
 
 // Define the IUser interface extending mongoose.Document
