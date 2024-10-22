@@ -1,7 +1,7 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/mongoose';
 import User, { IUser } from '@/models/User'; // Assuming IUser is your user model interface
 import sgMail from '@sendgrid/mail';
