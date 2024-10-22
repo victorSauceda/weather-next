@@ -1,3 +1,4 @@
+// Updated /api/signup route:
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -39,9 +40,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ message: 'User created successfully!' }, { status: 201 });
 
   } catch (err: unknown) {
-
     if (err instanceof Error) {
-
       console.error('Error occurred during signup:', err.message);
       console.error(err.stack);
     } else {
