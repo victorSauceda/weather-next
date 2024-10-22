@@ -1,11 +1,8 @@
 "use client";
+
 import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import SignInForm from '../../components/SignInForm';
-
-interface SignInProps {
-  providers: Record<string, ClientSafeProvider>;
-}
 
 export default function SignIn() {
   const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
