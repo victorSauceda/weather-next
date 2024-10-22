@@ -1,36 +1,38 @@
 'use server';
-import { NextApiRequest, NextApiResponse } from 'next';
+
+import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import dbConnect from '../../../../lib/mongoose';
-import User from '../../../../models/User';
+import dbConnect from '@/lib/mongoose'; // Adjust this path if necessary
+import User from '@/models/User';
 import { signIn } from 'next-auth/react';
 
-export default async function signInRoute(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export async function POST(req: NextRequest) {
   await dbConnect();
-  const { email, password }: { email: string; password: string } = req.body;
-
+  
+  const { email, password }: { email: string; password: string } = await req.json(); // Parsing the request body
+  
   // Check if user exists
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return NextResponse.json({ message: 'User not found' }, { status: 404 });
   }
 
   // Check if the user's email has been verified
   if (!user.emailVerified) {
-    return res.status(403).json({ message: 'Please verify your email before signing in.' });
+    return NextResponse.json({ message: 'Please verify your email before signing in.' }, { status: 403 });
   }
 
   // Compare the provided password with the stored hashed password
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    return res.status(401).json({ message: 'Invalid email or password' });
+    return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
   }
 
   // Proceed to sign in the user using NextAuth credentials
   const result = await signIn('credentials', { redirect: false, email, password });
   if (result?.error) {
-    return res.status(401).json({ message: result.error });
+    return NextResponse.json({ message: result.error }, { status: 401 });
   }
 
-  res.status(200).json({ message: 'Sign-in successful!' });
+  return NextResponse.json({ message: 'Sign-in successful!' }, { status: 200 });
 }
