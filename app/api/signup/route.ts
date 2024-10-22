@@ -1,7 +1,7 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
+import * as bcrypt from 'bcryptjs'; // Import bcrypt for password hashing
 import dbConnect from '@/lib/mongoose'; // Adjust the path if needed
 import User, { IUser } from '@/models/User'; // Assuming IUser is an interface for User model
 
