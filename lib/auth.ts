@@ -49,7 +49,7 @@ const authOptions: NextAuthOptions = {
     signIn: '/signin', // Custom sign-in page
   },
 
-  secret: process.env.SECRET, // For signing tokens
+  secret: process.env.NEXTAUTH_SECRET, // For signing tokens
 };
 
 export default authOptions;
