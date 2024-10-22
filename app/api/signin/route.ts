@@ -1,9 +1,9 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import dbConnect from '../../../lib/mongoose'; // Adjust the path as necessary
-import User, { IUser } from '../../../models/User'; // Assuming you have an IUser interface
+import  {compare} from 'bcryptjs';
+import dbConnect from '@/lib/mongoose'; // Adjust the path as necessary
+import User, { IUser } from '@/models/User'; // Assuming you have an IUser interface
 import { signIn } from 'next-auth/react';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Compare the provided password with the stored hashed password
-    const isPasswordValid: boolean = await bcrypt.compare(password, user.password);
+    const isPasswordValid: boolean = await compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
