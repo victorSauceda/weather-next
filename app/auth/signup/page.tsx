@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation'; // For programmatic navigation
 
 export default function SignUp() {
@@ -15,29 +14,38 @@ export default function SignUp() {
   // Function to handle sign-up form submission
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null); // Clear previous errors
+
     if (password !== confirmPassword) {
       // Check if passwords match
       setError('Passwords do not match');
       return;
     }
+
     try {
+      console.log('Submitting signup request:', { email, password });
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
+
       if (res.ok) {
         // Show the email sent message for 3 seconds
+        console.log('Signup successful, redirecting...');
         setEmailSent(true);
         setTimeout(() => {
           // Redirect to login after 3 seconds
           router.push('/signin');
         }, 3000); // 3-second delay
       } else {
+        // Fetch the error message and display it
         const data = await res.json();
-        setError(data.message);
+        console.error('Signup failed:', data);
+        setError(data.message || 'Failed to sign up. Please try again.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Unexpected error during signup:', err); // Log the actual error
       setError('Failed to sign up. Please try again.');
     }
   };
