@@ -4,7 +4,7 @@ import mongoose, { Schema, Document, model, models, Types } from 'mongoose';
 
 // Define the IUser interface extending mongoose.Document
 export interface IUser extends Document {
-  name: string;
+  name?: string;
   email: string;
   password: string;
   image?: string; // Optional field
@@ -16,7 +16,7 @@ export interface IUser extends Document {
 
 // Define the User schema
 const UserSchema: Schema<IUser> = new Schema({
-  name: { type: String, required: true },
+  name: { type: String},
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   image: { type: String }, // Optional field
