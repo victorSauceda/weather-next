@@ -1,6 +1,7 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
 import dbConnect from '@/lib/mongoose'; // Adjust the path if needed
 import User, { IUser } from '@/models/User'; // Assuming IUser is an interface for User model
 import sgMail from '@sendgrid/mail';
@@ -29,7 +30,8 @@ function getTokenExpiry(minutes: number = 15): Date {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   await dbConnect();
 
-  const { email }: { email: string } = await req.json(); // Parse request body and type `email` as string
+  // Parse request body and extract email and password
+  const { email, password }: { email: string; password: string } = await req.json();
 
   // Check if the user already exists
   const existingUser: IUser | null = await User.findOne({ email });
@@ -43,9 +45,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Set the token expiration (e.g., valid for 15 minutes)
   const tokenExpiry: Date = getTokenExpiry(15); // Expiry set to 15 minutes
 
+  // Hash the password before saving the user
+  const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds for bcrypt
+
   // Create a new user object with proper typing
   const newUser: IUser = await User.create({
     email,
+    password: hashedPassword, // Save the hashed password
     emailVerified: false,
     token,
     tokenExpiry,
@@ -58,16 +64,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const msg = {
     to: email, // User's email
     from: fromEmail, // Verified SendGrid sender
-    subject: 'Your Magic Sign-In Link',
-    text: `Click the following link to sign in: ${magicLinkUrl}`,
-    html: `<p>Click the following link to sign in: <a href="${magicLinkUrl}">Sign In</a></p>`,
+    subject: 'Verify your email to complete registration',
+    text: `Click the following link to verify your email: ${magicLinkUrl}`,
+    html: `<p>Click the following link to verify your email: <a href="${magicLinkUrl}">Verify Email</a></p>`,
   };
 
   try {
     await sgMail.send(msg);
-    return NextResponse.json({ message: 'User created and magic link sent!' }, { status: 201 });
+    return NextResponse.json({ message: 'User created and verification email sent!' }, { status: 201 });
   } catch (error) {
-    console.error('Error sending magic link:', error);
-    return NextResponse.json({ message: 'Failed to send magic link' }, { status: 500 });
+    console.error('Error sending verification email:', error);
+    return NextResponse.json({ message: 'Failed to send verification email' }, { status: 500 });
   }
 }

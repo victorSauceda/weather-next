@@ -6,6 +6,7 @@ import mongoose, { Schema, Document, model, models, Types } from 'mongoose';
 export interface IUser extends Document {
   name: string;
   email: string;
+  password: string;
   image?: string; // Optional field
   favoriteCities: Types.ObjectId[]; // Array of ObjectId referencing City model
   emailVerified: boolean; // Boolean to track if email is verified
@@ -17,6 +18,7 @@ export interface IUser extends Document {
 const UserSchema: Schema<IUser> = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   image: { type: String }, // Optional field
   favoriteCities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'City' }], // Reference to City model
   emailVerified: { type: Boolean, default: false }, // Defaults to false (user needs to verify email)
