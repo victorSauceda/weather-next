@@ -19,15 +19,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Check if the user's email has been verified
-    if (!user.emailVerified) {
-      return NextResponse.json({ message: 'Please verify your email before signing in.' }, { status: 403 });
-    }
+    // if (!user.emailVerified) {
+    //   return NextResponse.json({ message: 'Please verify your email before signing in.' }, { status: 403 });
+    // }
 
     // Compare the provided password with the stored hashed password
-    const isPasswordValid: boolean = await compare(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
-    }
+    // const isPasswordValid: boolean = await compare(password, user.password);
+    // if (!isPasswordValid) {
+    //   return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+    // }
 
     // Proceed to sign in the user using NextAuth credentials
     const result = await signIn('credentials', { redirect: false, email, password });
