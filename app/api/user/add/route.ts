@@ -36,11 +36,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
     let user = await User.findOne({ email: session.user?.email });
     if (!user) {
       console.log("User not found, creating a new user...");
-      user = new User({
-        email: session.user?.email,
-        favoriteCities: [],
-      });
-      await user.save();
+user = new User({
+  email: session.user?.email,
+  name: session.user?.name || '',
+  image: session.user?.image || '',
+  favoriteCities: [],
+});
+await user.save();
       console.log("New user created:", user.email);
     } else {
       console.log("User found:", user.email);
