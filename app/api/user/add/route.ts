@@ -4,10 +4,10 @@ import dbConnect from '../../../../lib/mongoose';
 import User from '../../../../models/User';
 import City from '../../../../models/City';
 import { getServerSession } from 'next-auth';
-import { City as CityType } from '../../../components/AutocompleteSearch'; // Import City from AutocompleteSearch
+import { City as CityType } from '../../../components/AutocompleteSearch'; // Import CityType from a shared types folder
 import authOptions from '../../../../lib/auth';
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest, res: NextResponse): Promise<NextResponse> {
   try {
     console.log("Route hit: POST /api/user/add");
 
@@ -36,13 +36,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
     let user = await User.findOne({ email: session.user?.email });
     if (!user) {
       console.log("User not found, creating a new user...");
-user = new User({
-  email: session.user?.email,
-  name: session.user?.name || '',
-  image: session.user?.image || '',
-  favoriteCities: [],
-});
-await user.save();
+      user = new User({
+        email: session.user?.email,
+        name: session.user?.name || '',
+        image: session.user?.image || '',
+        favoriteCities: [],
+      });
+      await user.save();
       console.log("New user created:", user.email);
     } else {
       console.log("User found:", user.email);
@@ -59,12 +59,22 @@ await user.save();
       console.log("City record found:", cityRecord);
     }
 
+    // Check if the city is already in user's favorites
+    if (user.favoriteCities.includes(cityRecord._id)) {
+      console.log("City is already in user's favorites");
+      return NextResponse.json({ message: 'City already in favorites' }, { status: 200 });
+    }
+
+    // Add city to user's favorites
     console.log("Adding city to user's favorites...");
     user.favoriteCities.push(cityRecord._id);
     await user.save();
     console.log("City added to user's favorites");
 
-    console.log("Returning response with user's favorite cities");
+    // Populate and return the updated list of favorite cities
+    await user.populate('favoriteCities');
+    console.log("Returning updated favorites with city:", user.favoriteCities);
+
     return NextResponse.json(user.favoriteCities, { status: 200 });
     
   } catch (error: unknown) {
