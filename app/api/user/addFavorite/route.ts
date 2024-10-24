@@ -7,7 +7,7 @@ import { getServerSession } from 'next-auth';
 import { City as CityType } from '../../../components/AutocompleteSearch'; // Import City from AutocompleteSearch
 import authOptions from '../../../../lib/auth';
 
-export default async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest, res: NextResponse) {
   await dbConnect();
   const body = await req.json()
   const { city }: { city: CityType } = body;
