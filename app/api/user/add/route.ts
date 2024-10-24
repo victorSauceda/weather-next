@@ -9,7 +9,7 @@ import authOptions from '../../../../lib/auth';
 
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
-    console.log("test route");
+    console.log("tet route");
 
     // Connect to the database
     await dbConnect();
