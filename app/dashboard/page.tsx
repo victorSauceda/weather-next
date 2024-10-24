@@ -66,7 +66,7 @@ export default function Dashboard() {
   const removeCityFromFavorites = async (cityId: number) => {
     try {
       const response = await fetch('/api/user/removeFavorite', {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         },
