@@ -27,18 +27,19 @@
 // // Export the User model, handling the case where the model is already compiled
 // const User = models.User || model<IUser>('User', UserSchema);
 // export default User;
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
+import { ICity } from './City'; // Assuming City is defined in another file
 
 export interface IUser extends Document {
-  name: string;
   email: string;
+  name: string;
   image: string;
-  favoriteCities: Array<mongoose.Schema.Types.ObjectId>; // Reference to City model
+  favoriteCities: ICity[]; // This allows both unpopulated and populated states
 }
 
-const UserSchema: Schema = new Schema({
-  name: { type: String, required: true },
+const UserSchema: Schema<IUser> = new Schema({
   email: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   image: { type: String },
   favoriteCities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'City' }],
 });
