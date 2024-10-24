@@ -1,8 +1,8 @@
 'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/mongoose';
-import User from '../../../../models/User'; // Ensure correct import of User model
-import City from '../../../../models/City'; // Ensure City model is registered correctly
+import User, { IUser } from '../../../../models/User'; // Ensure correct import of IUser interface
+import City, { ICity } from '../../../../models/City'; // Ensure City model is registered correctly
 import { getServerSession } from 'next-auth';
 import authOptions from '../../../../lib/auth';
 
@@ -26,7 +26,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // Find the user by email and populate the favorite cities
     console.log("Finding user and populating favorite cities...");
-    const user = await User.findOne({ email: session.user?.email }).populate('favoriteCities');
+    const user: IUser | null = await User.findOne({ email: session.user?.email }).populate<{
+      favoriteCities: ICity[];
+    }>('favoriteCities'); // Ensure correct typing for populated cities
+
     if (!user || !user.favoriteCities) {
       console.log("No user or favorite cities found, returning empty array.");
       return NextResponse.json([], { status: 200 });

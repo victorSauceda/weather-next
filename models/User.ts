@@ -34,7 +34,7 @@ export interface IUser extends Document {
   email: string;
   name: string;
   image: string;
-  favoriteCities: ICity[]; // This allows both unpopulated and populated states
+  favoriteCities: ICity[]; 
 }
 
 const UserSchema: Schema<IUser> = new Schema({

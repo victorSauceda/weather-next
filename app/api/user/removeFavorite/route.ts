@@ -1,12 +1,12 @@
 'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../lib/mongoose';
-import User from '../../../../models/User';
+import User, { IUser } from '../../../../models/User';
 import { getServerSession } from 'next-auth';
 import authOptions from '../../../../lib/auth';
-import City from '../../../../models/City'; 
+import { ICity } from '../../../../models/City'; // Import ICity interface
 
-export async function DELETE(req: NextRequest, res: NextResponse): Promise<NextResponse> {
+export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
     console.log("DELETE /api/user/removeFavorite route hit");
 
@@ -30,18 +30,21 @@ export async function DELETE(req: NextRequest, res: NextResponse): Promise<NextR
     }
     console.log(`Session found for user: ${session.user?.email}`);
 
-    // Find user by email
-    console.log("Finding user by email...");
-    const user = await User.findOne({ email: session.user?.email });
+    // Find user by email and populate favoriteCities with full city objects
+    console.log("Finding user and populating favorite cities...");
+    const user: IUser | null = await User.findOne({ email: session.user?.email }).populate<{
+      favoriteCities: ICity[];
+    }>('favoriteCities'); // Use <ICity[]> to type the populated data
+
     if (!user) {
       console.log("User not found, returning 404.");
       return NextResponse.json({ message: 'User Not Found' }, { status: 404 });
     }
     console.log(`User found: ${user.email}`);
 
-    // Remove city from user's favorites
+    // Remove the city by comparing cityId with the populated ICity documents
     console.log(`Attempting to remove city with ID: ${cityId} from user's favorites.`);
-    user.favoriteCities = user.favoriteCities.filter((fav: number) => fav.toString() !== cityId.toString());
+    user.favoriteCities = user.favoriteCities.filter((favCity: ICity) => favCity.id !== cityId);
     await user.save();
     console.log("City removed from user's favorites and user saved.");
 
