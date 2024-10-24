@@ -4,7 +4,7 @@ import dbConnect from '../../../../lib/mongoose';
 import User, { IUser } from '../../../../models/User';
 import { getServerSession } from 'next-auth';
 import authOptions from '../../../../lib/auth';
-import { ICity } from '../../../../models/City'; // Import ICity interface
+import City,{ ICity } from '../../../../models/City'; // Import ICity interface
 
 export async function DELETE(req: NextRequest): Promise<NextResponse> {
   try {
