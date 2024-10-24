@@ -53,8 +53,15 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ city })
       });
-      if (!response.ok) throw new Error('Failed to add city');
+
+
       const updatedFavorites = await response.json();
+            if (!response.ok) throw new Error('Failed to add city');
+          if (response.status === 200 && updatedFavorites.message === 'City already in favorites') {
+      console.log('City already in favorites');
+      alert('City already in your favorites!');
+      return;
+    }
       console.log({updatedFavorites})
       setFavorites(updatedFavorites); // Update favorites list after successful addition
     } catch (error) {
