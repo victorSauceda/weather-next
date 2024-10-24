@@ -65,8 +65,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
     console.log("Returning response with user's favorite cities");
     return NextResponse.json(user.favoriteCities, { status: 200 });
     
-  } catch (error) {
-    console.error('Error in add route:', error);
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error in add route:', (error as Error).message, (error as Error).stack);
+    return NextResponse.json({ message: 'Server error', details: (error as Error).message }, { status: 500 });
   }
 }
