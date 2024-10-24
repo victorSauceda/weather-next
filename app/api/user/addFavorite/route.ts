@@ -8,6 +8,7 @@ import { City as CityType } from '../../../components/AutocompleteSearch'; // Im
 import authOptions from '../../../../lib/auth';
 
 export async function POST(req: NextRequest, res: NextResponse) {
+  console.log("test route")
   await dbConnect();
   const body = await req.json()
   const { city }: { city: CityType } = body;
