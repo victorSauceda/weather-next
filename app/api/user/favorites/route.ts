@@ -5,7 +5,7 @@ import User from '../../../../models/User';
 import { getServerSession } from 'next-auth';
 import authOptions from '../../../../lib/auth';
 
-export default async function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   await dbConnect();
   const session = await getServerSession(authOptions);
   console.log(session);
