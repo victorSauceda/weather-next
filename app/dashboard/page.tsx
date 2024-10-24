@@ -63,22 +63,38 @@ export default function Dashboard() {
   };
 
   // Function to remove a city from the favorites list
-  const removeCityFromFavorites = async (cityId: number) => {
-    try {
-      const response = await fetch('/api/user/removeFavorite', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ cityId })
-      });
-      if (!response.ok) throw new Error('Failed to remove city');
-      const updatedFavorites = await response.json();
-      setFavorites(updatedFavorites); // Update favorites list after successful removal
-    } catch (error) {
-      console.error('Error removing city from favorites:', error);
+const removeCityFromFavorites = async (cityId: number) => {
+  console.log(`Initiating removal of city with ID: ${cityId}`);
+
+  try {
+    console.log(`Sending DELETE request to /api/user/removeFavorite for city ID: ${cityId}`);
+    
+    const response = await fetch('/api/user/removeFavorite', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ cityId }),
+    });
+
+    console.log(`Received response from DELETE request with status: ${response.status}`);
+
+    if (!response.ok) {
+      console.error(`Failed to remove city with ID: ${cityId}. Status: ${response.status}`);
+      throw new Error('Failed to remove city');
     }
-  };
+
+    const updatedFavorites = await response.json();
+    console.log('Updated favorites received from server:', updatedFavorites);
+
+    // Update state with new favorites
+    setFavorites(updatedFavorites);
+    console.log('Favorites state updated successfully');
+
+  } catch (error) {
+    console.error('Error removing city from favorites:', error);
+  }
+};
 
   if (loading){return <p>Loading...</p>}
   if (!session ){return <p>Redirection...</p>}
