@@ -4,6 +4,7 @@ import dbConnect from '../../../../lib/mongoose';
 import User from '../../../../models/User';
 import { getServerSession } from 'next-auth';
 import authOptions from '../../../../lib/auth';
+import City from '../../../../models/City'; 
 
 export async function DELETE(req: NextRequest, res: NextResponse): Promise<NextResponse> {
   try {
