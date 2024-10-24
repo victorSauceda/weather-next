@@ -46,7 +46,7 @@ export default function Dashboard() {
   // Function to add a city to the favorites list
   const addCityToFavorites = async (city: City) => {
     try {
-      const response = await fetch('/api/user/addFavorite', {
+      const response = await fetch('/api/user/add-city', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
