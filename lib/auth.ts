@@ -50,7 +50,7 @@ const authOptions: NextAuthOptions = {
     strategy: "jwt"  // Use JWT for session management
   },
   // Secret for signing JWT and encrypting tokens
-  secret: process.env.SECRET
+  secret: process.env.NEXT_AUTH_SECRET
 };
 
 export default authOptions;
