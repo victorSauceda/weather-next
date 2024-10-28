@@ -1,18 +1,22 @@
-"use client"; // Make sure this is at the top
+"use client";
 
 import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import SignInForm from '../../components/SignInForm';
-import { useRouter } from 'next/navigation'; // Import useRouter from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
-  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
-  const router = useRouter(); // Use the new router from 'next/navigation'
+  const [providers, setProviders] = useState<ClientSafeProvider[] | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProviders = async () => {
       const res = await getProviders();
-      setProviders(res);
+      // Filter out the 'Credentials' provider
+      const filteredProviders = Object.values(res || {}).filter(
+        (provider): provider is ClientSafeProvider => provider.id !== "credentials"
+      );
+      setProviders(filteredProviders);
     };
 
     fetchProviders();
@@ -20,10 +24,10 @@ export default function SignIn() {
 
   const handleSignIn = (providerId: string) => {
     signIn(providerId, { callbackUrl: '/dashboard' });
-  };
+  }
 
   const handleSignUp = () => {
-    router.push('/auth/signup'); // Redirect to sign-up page using the new router
+    router.push('/auth/signup');
   };
 
   return (
@@ -31,13 +35,14 @@ export default function SignIn() {
       <div className="w-full max-w-md space-y-8">
         <div className="bg-white shadow-lg rounded-lg p-8">
           <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Sign in to your account</h2>
+          
           {/* Sign In Form for email/password authentication */}
           <SignInForm />
 
           {/* Sign Up Link */}
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              {`Don't`} have an account?{' '}
               <button
                 onClick={handleSignUp}
                 className="text-blue-600 hover:underline"
@@ -52,10 +57,10 @@ export default function SignIn() {
         {providers && (
           <div className="mt-6">
             <div className="flex flex-col space-y-4">
-              {Object.values(providers).map((provider) => (
+              {providers.map((provider) => (
                 <button
                   key={provider.name}
-                  onClick={() => handleSignIn(provider.id)} // Use the handler with redirect
+                  onClick={() => handleSignIn(provider.id)}
                   className="w-full py-2 px-4 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
                 >
                   Sign in with {provider.name}
