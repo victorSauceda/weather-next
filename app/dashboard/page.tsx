@@ -58,7 +58,7 @@ export default function Dashboard() {
       return;
     }
     try {
-      const response = await fetch('/api/user/addFavorite', {
+      const response = await fetch('/api/user/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
