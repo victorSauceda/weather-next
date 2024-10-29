@@ -19,11 +19,17 @@ export default function UserProfile() {
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "loading") return; // Wait until loading is complete
+
+    if (status === "unauthenticated") {
+      router.push("/auth/signin"); // Redirect to sign-in if no session
+    }
+
     if (status === "authenticated") {
       setName(session?.user?.name || "");
       setEmail(session?.user?.email || "");
     }
-  }, [status, session]);
+  }, [status, session, router]);
 
   const toggleEditField = (field: string) => {
     setEditingField(editingField === field ? null : field);
@@ -59,7 +65,6 @@ export default function UserProfile() {
         );
         setEditingField(null);
 
-        // If email was updated, sign out and prompt user to sign in again
         if (isEmailUpdate) {
           setTimeout(() => {
             signOut();
