@@ -51,7 +51,7 @@ export default function UserProfile() {
       : "/api/user/update-profile";
     const body = isPasswordUpdate
       ? { newPassword: password, currentPassword } // Only for password update
-      : { name, email, password: password || undefined, isEmailUpdate, id };
+      : { id, name, email, password: password || undefined, isEmailUpdate };
 
     try {
       const res = await fetch(endpoint, {
