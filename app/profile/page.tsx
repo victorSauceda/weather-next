@@ -5,17 +5,11 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function UserProfile() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Console log session data for debugging
-  useEffect(() => {
-    console.log("Session data:", session);
-  }, [session]);
-
-  // Set initial state with session data if available
-  const [name, setName] = useState(session?.user?.name || "");
-  const [email, setEmail] = useState(session?.user?.email || "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -24,18 +18,12 @@ export default function UserProfile() {
   const [confirmDelete, setConfirmDelete] = useState("");
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
 
-  // Check if name and email state updates correctly with session data
   useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name || "");
-      setEmail(session.user.email || "");
-      console.log(
-        "Name and email updated:",
-        session.user.name,
-        session.user.email
-      );
+    if (status === "authenticated") {
+      setName(session?.user?.name || "");
+      setEmail(session?.user?.email || "");
     }
-  }, [session]);
+  }, [status, session]);
 
   const toggleEditField = (field: string) => {
     setEditingField(editingField === field ? null : field);
@@ -79,6 +67,10 @@ export default function UserProfile() {
       setDeleteMessage("Failed to delete account. Please try again.");
     }
   };
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
@@ -153,17 +145,15 @@ export default function UserProfile() {
           </button>
         </div>
 
-        {/* Save Changes Button */}
         {editingField && (
           <button
             onClick={handleSave}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            className="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
           >
             Save Changes
           </button>
         )}
 
-        {/* Go Back to Dashboard */}
         <button
           onClick={() => router.push("/dashboard")}
           className="w-full mt-4 bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 transition"
@@ -171,7 +161,6 @@ export default function UserProfile() {
           Go Back to Dashboard
         </button>
 
-        {/* Delete Account Section */}
         <div className="border-t pt-6 mt-4">
           <button
             onClick={() => setDeleteMode(!deleteMode)}
