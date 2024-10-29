@@ -35,27 +35,42 @@ export default function UserProfile() {
     const isEmailUpdate =
       editingField === "email" && email !== session?.user?.email;
 
-    const res = await fetch("/api/user/update-profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        password: password || undefined,
-        isEmailUpdate, // Include the flag for email updates
-      }),
-    });
+    const endpoint = isEmailUpdate ? "/api/signup" : "/api/user/update-profile";
+    const body = {
+      name,
+      email,
+      password: password || undefined,
+      isEmailUpdate,
+    };
 
-    const data = await res.json();
-    if (res.ok) {
-      setMessage(
-        isEmailUpdate
-          ? "Please check your email to verify your new address."
-          : "Profile updated successfully."
-      );
-      setEditingField(null);
-    } else {
-      setError(data.message || "Failed to update profile.");
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(
+          isEmailUpdate
+            ? "Please check your email to verify your new address."
+            : "Profile updated successfully."
+        );
+        setEditingField(null);
+
+        // If email was updated, sign out and prompt user to sign in again
+        if (isEmailUpdate) {
+          setTimeout(() => {
+            signOut();
+            router.push("/auth/signin");
+          }, 2000);
+        }
+      } else {
+        setError(data.message || "Failed to update profile.");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
     }
   };
 
