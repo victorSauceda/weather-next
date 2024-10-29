@@ -1,4 +1,4 @@
-import { NextAuthOptions, Session } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "../lib/mongoose";
@@ -47,26 +47,15 @@ const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  // Custom authentication pages
+
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/auth/signin", // Custom sign-in page route
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Use JWT for session management
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }): Promise<Session> {
-      if (token) {
-        session.user.id = token.id as string | undefined; // Ensure TypeScript recognizes this with the updated types
-      }
-      return session;
-    },
-  },
+  // Secret for signing JWT and encrypting tokens
   secret: process.env.NEXT_AUTH_SECRET,
 };
 

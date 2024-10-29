@@ -52,7 +52,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         expiry,
       });
       await User.findOneAndUpdate(
-        { _id: id },
+        { email },
         { token: updateToken, tokenExpiry: expiry }
       );
 

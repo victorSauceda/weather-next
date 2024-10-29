@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 export default function UserProfile() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +27,6 @@ export default function UserProfile() {
 
     if (status === "authenticated") {
       console.log("Session details", session?.user);
-      setId(session?.user?.id || "");
       setName(session?.user?.name || "");
       setEmail(session?.user?.email || "");
     }
@@ -52,7 +50,7 @@ export default function UserProfile() {
       : "/api/user/update-profile";
     const body = isPasswordUpdate
       ? { newPassword: password, currentPassword } // Only for password update
-      : { id, name, email, password: password || undefined, isEmailUpdate };
+      : { name, email, password: password || undefined, isEmailUpdate };
 
     try {
       const res = await fetch(endpoint, {
