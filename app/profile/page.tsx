@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function UserProfile() {
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Console log session data for debugging
+  useEffect(() => {
+    console.log("Session data:", session);
+  }, [session]);
+
+  // Set initial state with session data if available
   const [name, setName] = useState(session?.user?.name || "");
   const [email, setEmail] = useState(session?.user?.email || "");
   const [password, setPassword] = useState("");
@@ -16,6 +23,19 @@ export default function UserProfile() {
   const [deleteMode, setDeleteMode] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState("");
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+
+  // Check if name and email state updates correctly with session data
+  useEffect(() => {
+    if (session?.user) {
+      setName(session.user.name || "");
+      setEmail(session.user.email || "");
+      console.log(
+        "Name and email updated:",
+        session.user.name,
+        session.user.email
+      );
+    }
+  }, [session]);
 
   const toggleEditField = (field: string) => {
     setEditingField(editingField === field ? null : field);
@@ -80,7 +100,7 @@ export default function UserProfile() {
               className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
             />
           ) : (
-            <p className="mt-1 text-gray-800">{name}</p>
+            <p className="mt-1 text-gray-800">{name || "N/A"}</p>
           )}
           <button
             onClick={() => toggleEditField("name")}
@@ -101,7 +121,7 @@ export default function UserProfile() {
               className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
             />
           ) : (
-            <p className="mt-1 text-gray-800">{email}</p>
+            <p className="mt-1 text-gray-800">{email || "N/A"}</p>
           )}
           <button
             onClick={() => toggleEditField("email")}
