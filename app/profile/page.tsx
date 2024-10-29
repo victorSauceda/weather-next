@@ -27,6 +27,7 @@ export default function UserProfile() {
     }
 
     if (status === "authenticated") {
+      console.log("Session details", session?.user);
       setId(session?.user?.id || "");
       setName(session?.user?.name || "");
       setEmail(session?.user?.email || "");
