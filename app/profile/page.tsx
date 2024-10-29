@@ -32,15 +32,27 @@ export default function UserProfile() {
   };
 
   const handleSave = async () => {
+    const isEmailUpdate =
+      editingField === "email" && email !== session?.user?.email;
+
     const res = await fetch("/api/user/update-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password: password || undefined }),
+      body: JSON.stringify({
+        name,
+        email,
+        password: password || undefined,
+        isEmailUpdate, // Include the flag for email updates
+      }),
     });
 
     const data = await res.json();
     if (res.ok) {
-      setMessage("Profile updated successfully.");
+      setMessage(
+        isEmailUpdate
+          ? "Please check your email to verify your new address."
+          : "Profile updated successfully."
+      );
       setEditingField(null);
     } else {
       setError(data.message || "Failed to update profile.");

@@ -1,3 +1,4 @@
+// /app/api/auth/verify-email.ts
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -5,7 +6,6 @@ import dbConnect from "../../../lib/mongoose";
 import User, { IUser } from "../../../models/User";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  // Parse the URL to get query parameters
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
   let email = url.searchParams.get("email");
@@ -21,44 +21,44 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     await dbConnect();
 
-    // Find the user with the provided email and magic token
-    console.log(email, token);
-    const user: IUser | null = await User.findOne({ email, token });
-    const currentTime = new Date();
-    console.log("current time", currentTime, user);
-    if (user && user?.tokenExpiry) {
-      console.log("tokenExpiry", user?.tokenExpiry);
-    }
-    if (user && user?.tokenExpiry && currentTime > user.tokenExpiry) {
-      return NextResponse.json(
-        { message: "Magic link has expired." },
-        { status: 400 }
-      );
-    }
-
+    const user: IUser | null = await User.findOne({
+      token,
+      tokenExpiry: { $gt: new Date() },
+    });
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid or expired magic link." },
+        { message: "Invalid or expired token." },
         { status: 400 }
       );
     }
-    // Update the user's email verification status
-    user.emailVerified = true;
-    user.token = null; // Clear the magic token after successful verification
-    user.tokenExpiry = null;
 
+    // Determine if it's a new signup or email update
+    const isEmailUpdate = user.email !== email;
+
+    if (isEmailUpdate) {
+      user.email = email;
+      user.emailVerified = true;
+      await user.save();
+
+      // Redirect to the sign-in page for email update
+      return NextResponse.redirect(
+        new URL("/auth/signin", process.env.NEXTAUTH_URL).toString()
+      );
+    }
+
+    // For new signup, verify the email and redirect to dashboard
+    user.emailVerified = true;
+    user.token = null;
+    user.tokenExpiry = null;
     await user.save();
 
-    console.log(`User ${email} verified successfully.`);
-
-    // Redirect to the dashboard after successful verification
     return NextResponse.redirect(
       new URL("/dashboard", process.env.NEXTAUTH_URL).toString()
     );
   } catch (error) {
     console.error("Error during email verification:", error);
     return NextResponse.json(
-      { message: "Email verification failed. Please try again." },
+      { message: "Email verification failed." },
       { status: 500 }
     );
   }
