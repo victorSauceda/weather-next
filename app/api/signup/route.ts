@@ -16,7 +16,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.log("Database connected.");
 
     const {
-      id = "",
+      id,
       name,
       email,
       password,
