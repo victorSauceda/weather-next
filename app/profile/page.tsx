@@ -63,7 +63,7 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+    <div className="min-h-screen text-black flex items-center justify-center bg-gray-50 p-8">
       <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center">User Profile</h2>
         {message && (

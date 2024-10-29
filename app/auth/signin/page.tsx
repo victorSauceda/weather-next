@@ -36,7 +36,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8 px-4">
+    <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-50 py-8 px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="bg-white shadow-lg rounded-lg p-8">
           <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">
