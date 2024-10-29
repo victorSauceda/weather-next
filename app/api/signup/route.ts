@@ -14,11 +14,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await dbConnect();
     const {
+      id = "",
       name,
       email,
       password,
       isEmailUpdate = false,
     }: {
+      id?: string;
       name: string;
       email: string;
       password?: string;
@@ -38,6 +40,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const updateToken = uuidv4();
       const expiry = new Date();
       expiry.setHours(expiry.getHours() + 10);
+
+      await User.findOneAndUpdate(
+        { _id: id },
+        { token: updateToken, tokenExpiry: expiry }
+      );
       const verificationLink = `${process.env.NEXTAUTH_URL}/api/verify-email?token=${updateToken}&email=${email}`;
 
       await sendgrid.send({

@@ -7,6 +7,7 @@ import Link from "next/link";
 declare module "next-auth" {
   interface Session {
     user: {
+      id?: string;
       name?: string;
       email?: string;
       emailVerified?: boolean; // Add custom field here
