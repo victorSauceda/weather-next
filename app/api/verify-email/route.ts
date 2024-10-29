@@ -25,15 +25,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     // Find the user based on token and email
     const user: IUser | null = await User.findOne({
-      email,
-      token,
-      tokenExpiry: { $gt: new Date() }, // Ensure token is not expired
+      token, // Ensure token is not expired
     });
 
     if (!user) {
-      console.log(
-        `User with email: ${email} and token: ${token} not found or expired.`
-      );
+      console.log(`User with token: ${token} not found or expired.`);
       return NextResponse.json(
         { message: "Invalid or expired token." },
         { status: 400 }
