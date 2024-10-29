@@ -8,24 +8,21 @@ import User, { IUser } from "../../../models/User";
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  let email = url.searchParams.get("email");
 
-  // Ensure token and email are present
-  if (!token || !email) {
+  if (!token) {
     return NextResponse.json(
-      { message: "Invalid request. Missing token or email." },
+      { message: "Invalid request. Missing token." },
       { status: 400 }
     );
   }
 
-  email = email.replace(/ /g, "+");
-
   try {
     await dbConnect();
 
-    // Find the user based on token and email
+    // Find the user based solely on token
     const user: IUser | null = await User.findOne({
-      token, // Ensure token is not expired
+      token,
+      tokenExpiry: { $gt: new Date() },
     });
 
     if (!user) {
@@ -36,30 +33,27 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const isEmailUpdate = user.email !== email;
-    user.emailVerified = true;
+    // Check if it is an email update
+    const isEmailUpdate = url.searchParams.get("email") !== user.email;
 
     if (isEmailUpdate) {
-      user.email = email;
-      user.token = null;
-      user.tokenExpiry = null;
-      await user.save();
-
-      // Redirect for an email update
-      return NextResponse.redirect(
-        new URL("/auth/signin", process.env.NEXTAUTH_URL).toString()
-      );
-    } else {
-      // For a new signup, verify email and clear token
-      user.token = null;
-      user.tokenExpiry = null;
-      await user.save();
-
-      // Redirect to the dashboard after successful signup
-      return NextResponse.redirect(
-        new URL("/dashboard", process.env.NEXTAUTH_URL).toString()
-      );
+      // Update email if different
+      user.email = url.searchParams.get("email")!;
     }
+
+    // Mark email as verified, clear token and expiry
+    user.emailVerified = true;
+    user.token = null;
+    user.tokenExpiry = null;
+    await user.save();
+
+    // Redirect based on whether it was an email update or signup
+    return NextResponse.redirect(
+      new URL(
+        isEmailUpdate ? "/auth/signin" : "/dashboard",
+        process.env.NEXTAUTH_URL
+      ).toString()
+    );
   } catch (error) {
     console.error("Error during email verification:", error);
     return NextResponse.json(
