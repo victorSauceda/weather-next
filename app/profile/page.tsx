@@ -11,6 +11,7 @@ export default function UserProfile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState(""); // For authenticating password changes
   const [editingField, setEditingField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -19,10 +20,10 @@ export default function UserProfile() {
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return; // Wait until loading is complete
+    if (status === "loading") return;
 
     if (status === "unauthenticated") {
-      router.push("/auth/signin"); // Redirect to sign-in if no session
+      router.push("/auth/signin");
     }
 
     if (status === "authenticated") {
@@ -40,14 +41,16 @@ export default function UserProfile() {
   const handleSave = async () => {
     const isEmailUpdate =
       editingField === "email" && email !== session?.user?.email;
+    const isPasswordUpdate = editingField === "password" && password;
 
-    const endpoint = isEmailUpdate ? "/api/signup" : "/api/user/update-profile";
-    const body = {
-      name,
-      email,
-      password: password || undefined,
-      isEmailUpdate,
-    };
+    const endpoint = isPasswordUpdate
+      ? "/api/auth/reset-password"
+      : isEmailUpdate
+      ? "/api/signup"
+      : "/api/user/update-profile";
+    const body = isPasswordUpdate
+      ? { newPassword: password, currentPassword } // Only for password update
+      : { name, email, password: password || undefined, isEmailUpdate };
 
     try {
       const res = await fetch(endpoint, {
@@ -159,13 +162,22 @@ export default function UserProfile() {
         <div>
           <label className="text-gray-700 font-medium">Password</label>
           {editingField === "password" ? (
-            <input
-              type="password"
-              placeholder="New Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
-            />
+            <>
+              <input
+                type="password"
+                placeholder="Current Password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              />
+              <input
+                type="password"
+                placeholder="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              />
+            </>
           ) : (
             <p className="mt-1 text-gray-800">********</p>
           )}
