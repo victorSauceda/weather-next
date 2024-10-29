@@ -16,20 +16,22 @@ declare module "next-auth" {
 }
 
 export default function Dashboard() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [favorites, setFavorites] = useState<City[]>([]);
   const [showEmailVerifiedMessage, setShowEmailVerifiedMessage] =
     useState(false);
 
   useEffect(() => {
-    if (!session) {
+    if (status === "loading") return; // Wait until loading is complete
+
+    if (status === "unauthenticated") {
       signIn(); // Redirect to sign-in if no session
       return;
     }
 
     // Show email verification message only once
     if (
-      session.user?.emailVerified &&
+      session?.user?.emailVerified &&
       !localStorage.getItem("emailVerifiedShown")
     ) {
       setShowEmailVerifiedMessage(true);
@@ -38,29 +40,27 @@ export default function Dashboard() {
         setShowEmailVerifiedMessage(false);
       }, 3000);
     }
-  }, [session]);
+  }, [status, session]);
 
   // Load favorite cities from MongoDB when the component mounts
   useEffect(() => {
     async function fetchFavorites() {
-      try {
-        const response = await fetch("/api/user/favorites");
-        if (!response.ok) throw new Error("Failed to fetch favorites");
-        const data = await response.json();
-        console.log(data);
-        setFavorites(data);
-      } catch (error) {
-        console.error("Error fetching favorite cities:", error);
+      if (status === "authenticated") {
+        try {
+          const response = await fetch("/api/user/favorites");
+          if (!response.ok) throw new Error("Failed to fetch favorites");
+          const data = await response.json();
+          console.log(data);
+          setFavorites(data);
+        } catch (error) {
+          console.error("Error fetching favorite cities:", error);
+        }
       }
     }
     fetchFavorites();
   }, []);
 
   const addCityToFavorites = async (city: City) => {
-    if (!session?.user?.emailVerified) {
-      alert("Please verify your email before adding cities to favorites.");
-      return;
-    }
     try {
       const response = await fetch("/api/user/add", {
         method: "POST",
@@ -93,6 +93,9 @@ export default function Dashboard() {
       console.error("Error removing city from favorites:", error);
     }
   };
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen text-black flex flex-col items-center justify-center bg-gray-100 p-6">
