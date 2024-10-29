@@ -89,7 +89,7 @@ export default function UserProfile() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
             />
           ) : (
             <p className="mt-1 text-gray-800">{name || "N/A"}</p>
@@ -110,7 +110,7 @@ export default function UserProfile() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
             />
           ) : (
             <p className="mt-1 text-gray-800">{email || "N/A"}</p>
@@ -132,7 +132,7 @@ export default function UserProfile() {
               placeholder="New Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              className="w-full text-black px-3 py-2 mt-1 border border-gray-300 rounded-md"
             />
           ) : (
             <p className="mt-1 text-gray-800">********</p>
@@ -179,7 +179,7 @@ export default function UserProfile() {
                 value={confirmDelete}
                 onChange={(e) => setConfirmDelete(e.target.value)}
                 placeholder='Type "delete account"'
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full text-black px-3 py-2 border border-gray-300 rounded-md"
               />
               <button
                 onClick={handleDeleteAccount}
