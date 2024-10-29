@@ -1,9 +1,9 @@
 "use client";
 
-import { getProviders, signIn, ClientSafeProvider } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import SignInForm from '../../components/SignInForm';
-import { useRouter } from 'next/navigation';
+import { getProviders, signIn, ClientSafeProvider } from "next-auth/react";
+import { useEffect, useState } from "react";
+import SignInForm from "../../components/SignInForm";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [providers, setProviders] = useState<ClientSafeProvider[] | null>(null);
@@ -14,7 +14,8 @@ export default function SignIn() {
       const res = await getProviders();
       // Filter out the 'Credentials' provider
       const filteredProviders = Object.values(res || {}).filter(
-        (provider): provider is ClientSafeProvider => provider.id !== "credentials"
+        (provider): provider is ClientSafeProvider =>
+          provider.id !== "credentials"
       );
       setProviders(filteredProviders);
     };
@@ -23,26 +24,42 @@ export default function SignIn() {
   }, []);
 
   const handleSignIn = (providerId: string) => {
-    signIn(providerId, { callbackUrl: '/dashboard' });
-  }
+    signIn(providerId, { callbackUrl: "/dashboard" });
+  };
 
   const handleSignUp = () => {
-    router.push('/auth/signup');
+    router.push("/auth/signup");
+  };
+
+  const handleForgotPassword = () => {
+    router.push("/forgot-password");
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8 px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="bg-white shadow-lg rounded-lg p-8">
-          <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">Sign in to your account</h2>
-          
+          <h2 className="text-center text-2xl font-bold text-gray-900 mb-6">
+            Sign in to your account
+          </h2>
+
           {/* Sign In Form for email/password authentication */}
           <SignInForm />
+
+          {/* Forgot Password Link */}
+          <div className="text-center mt-4">
+            <button
+              onClick={handleForgotPassword}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Forgot Password?
+            </button>
+          </div>
 
           {/* Sign Up Link */}
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
-              {`Don't`} have an account?{' '}
+              {`Don't`} have an account?{" "}
               <button
                 onClick={handleSignUp}
                 className="text-blue-600 hover:underline"
