@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../../lib/mongoose";
 import User from "../../../../models/User";
 
-export async function DELETE(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const { email } = await req.json();
 
   if (!email) {

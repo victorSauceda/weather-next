@@ -16,24 +16,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.log("Database connected.");
 
     const {
-      id,
       name,
       email,
       password,
       isEmailUpdate = false,
     }: {
-      id?: string;
       name: string;
       email: string;
       password?: string;
       isEmailUpdate?: boolean;
     } = await req.json();
 
-    console.log("Request received:", { id, name, email, isEmailUpdate });
+    console.log("Request received:", { name, email, isEmailUpdate });
 
     // Handle email change for an existing user
     if (isEmailUpdate) {
-      console.log("Processing email update for user ID:", id);
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         console.log("Email is already in use:", email);
