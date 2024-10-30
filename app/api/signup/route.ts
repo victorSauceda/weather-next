@@ -20,11 +20,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email,
       password,
       isEmailUpdate = false,
+      newEmail = "",
     }: {
       name: string;
       email: string;
       password?: string;
       isEmailUpdate?: boolean;
+      newEmail?: string;
     } = await req.json();
 
     console.log("Request received:", { name, email, isEmailUpdate });
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       });
       await User.findOneAndUpdate(
         { email },
-        { token: updateToken, tokenExpiry: expiry }
+        { email: newEmail, token: updateToken, tokenExpiry: expiry }
       );
 
       const verificationLink = `${process.env.NEXTAUTH_URL}/api/verify-email?token=${updateToken}`;
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         subject: "Confirm your new email address",
         html: `<p>Please confirm your new email by clicking <a href="${verificationLink}">here</a>.</p>`,
       });
-      console.log("Verification email sent to:", email);
+      console.log("Verification email sent to:", newEmail);
 
       return NextResponse.json({ message: "Verification email sent." });
     }
