@@ -5,8 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import dbConnect from "../../../lib/mongoose";
 import User from "../../../models/User";
-import { getServerSession } from "next-auth";
-import authOptions from "../../../lib/auth";
 
 export async function GET(req: NextRequest) {
   // Parse the query parameters (for the initial page load when clicking the link)
@@ -27,31 +25,56 @@ export async function GET(req: NextRequest) {
 
 
 
+
 export async function POST(req: NextRequest) {
   try {
-    // Parse the body from the request
-    const { newPassword, token, email } = await req.json();
+    console.log("Starting password reset process...");
 
+    // Parse the body from the request
+    const body = await req.json();
+    const { newPassword, token, email } = body;
+    console.log("Received data:", { newPassword, token, email });
+
+    // Check if all required fields are provided
     if (!newPassword || !token || !email) {
+      console.log("Missing required fields:", { newPassword, token, email });
       return NextResponse.json(
         { message: "New password, token, and email are required." },
         { status: 400 }
       );
     }
 
+    console.log("Connecting to database...");
     await dbConnect();
+    console.log("Database connected.");
 
-    // Case 1: Password Reset using token and email (unauthenticated route)
+    // Find the user by email and token
+    console.log("Searching for user with provided email and token...");
     const user = await User.findOne({ email, token });
-    if (!user || !user.tokenExpiry || new Date() > user.tokenExpiry) {
+    console.log("User search result:", user);
+
+    // Check if the user exists and if the token is still valid
+    if (!user) {
+      console.log("User not found or token mismatch.");
       return NextResponse.json(
         { message: "Invalid or expired reset link." },
         { status: 400 }
       );
     }
 
-    // Hash the new password and update user record
+    if (!user.tokenExpiry || new Date() > user.tokenExpiry) {
+      console.log("Token expired:", user.tokenExpiry);
+      return NextResponse.json(
+        { message: "Token has expired." },
+        { status: 400 }
+      );
+    }
+
+    // Hash the new password and update the user record
+    console.log("Hashing new password...");
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    console.log("Updating user password...");
     user.password = hashedPassword;
     user.token = null;
     user.tokenExpiry = null;
