@@ -51,7 +51,7 @@ export default function ResetPassword({ searchParams }: ResetPasswordProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+    <div className="min-h-screen flex text-black items-center justify-center bg-gray-50 p-8">
       <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center">Reset Password</h2>
         {message && <p className="text-green-500 text-center mt-4">{message}</p>}
