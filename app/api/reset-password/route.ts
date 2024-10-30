@@ -20,63 +20,69 @@ export async function GET(req: NextRequest) {
 }
 export async function POST(req: NextRequest) {
   try {
-    // Fetch the session
-    const session = await getServerSession(authOptions);
+    console.log("Starting password reset process...");
 
-    // Check if there’s an authenticated session
-    if (!session || !session.user?.email) {
+    // Parse request body for newPassword and token/email
+    const { newPassword, token } = await req.json();
+
+    if (!newPassword) {
       return NextResponse.json(
-        { message: "Unauthorized request." },
-        { status: 401 }
-      );
-    }
-
-    const { email } = session.user; // Get email from session
-    console.log("Authenticated user email:", email);
-
-    // Parse the body for the new and current passwords
-    const { newPassword, currentPassword } = await req.json();
-
-    if (!newPassword || !currentPassword) {
-      return NextResponse.json(
-        { message: "New password and current password are required." },
+        { message: "New password is required." },
         { status: 400 }
       );
     }
 
     await dbConnect();
 
-    // Find the user in the database
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ message: "User not found." }, { status: 404 });
+    if (token) {
+      // Unauthenticated Forgot Password Flow
+      console.log("Handling forgot password reset using token...");
+      const user = await User.findOne({ token });
+
+      if (!user || !user.tokenExpiry || new Date() > user.tokenExpiry) {
+        console.log("Invalid or expired reset link.");
+        return NextResponse.json(
+          { message: "Invalid or expired reset link." },
+          { status: 400 }
+        );
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      user.token = null;
+      user.tokenExpiry = null;
+      await user.save();
+
+      console.log(`Password reset successful for user: ${user.email}`);
+      return NextResponse.json({ message: "Password reset successful" });
+    } else {
+      // Authenticated Profile Password Reset Flow
+      const session = await getServerSession(authOptions);
+
+      if (!session || !session.user?.email) {
+        return NextResponse.json(
+          { message: "Unauthorized request." },
+          { status: 401 }
+        );
+      }
+
+      console.log("Handling profile password update for authenticated user...");
+      const user = await User.findOne({ email: session.user.email });
+      if (!user) {
+        return NextResponse.json({ message: "User not found." }, { status: 404 });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      await user.save();
+
+      console.log(`Password updated successfully for user: ${session.user.email}`);
+      return NextResponse.json({ message: "Password updated successfully" });
     }
-
-    // Check if the current password is correct
-    const isCurrentPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
-    if (!isCurrentPasswordValid) {
-      return NextResponse.json(
-        { message: "Current password is incorrect." },
-        { status: 400 }
-      );
-    }
-
-    // Hash the new password and update the user record
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    await user.save();
-
-    return NextResponse.json(
-      { message: "Password updated successfully." },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error("Error during password update:", error);
+    console.error("Error during password reset/update:", error);
     return NextResponse.json(
-      { message: "Password update failed. Please try again." },
+      { message: "Password reset/update failed. Please try again." },
       { status: 500 }
     );
   }
