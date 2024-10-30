@@ -82,10 +82,7 @@ export async function POST(req: NextRequest) {
 
     console.log(`Password reset successful for user: ${email}`);
 
-    // Redirect to the sign-in page after successful reset
-    return NextResponse.redirect(
-      new URL("/auth/signin", process.env.NEXTAUTH_URL).toString()
-    );
+ return NextResponse.json({ message: "Password reset successful" });
   } catch (error) {
     console.error("Error during password reset:", error);
     return NextResponse.json(
