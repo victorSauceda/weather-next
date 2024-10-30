@@ -52,7 +52,7 @@ export default function UserProfile() {
       ? { newPassword: password, currentPassword } // Only for password update
       : {
           name,
-          email: session?.user.email,
+          email: isEmailUpdate?email:session?.user.email ,
           password: password || undefined,
           isEmailUpdate,
         };
