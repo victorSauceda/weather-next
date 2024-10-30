@@ -73,7 +73,7 @@ export default function UserProfile() {
         );
         setEditingField(null);
 
-        if (isEmailUpdate) {
+        if (isEmailUpdate || isPasswordUpdate) {
           setTimeout(() => {
             signOut();
             router.push("/auth/signin");
