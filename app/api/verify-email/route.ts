@@ -36,7 +36,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     }
 
     // Check if it is an email update by comparing the new email parameter
-    const emailFromRequest = url.searchParams.get("email");
+    const emailFromRequest = url.searchParams.get("email")?.replace(/ /g, "+");;
     const isEmailUpdate = emailFromRequest && emailFromRequest !== user.email;
 
     // Update the user's email if it's an email update
