@@ -15,7 +15,7 @@ export default function SignInForm() {
     setError(null); // Clear any previous errors
 
     const res = await signIn("credentials", {
-      redirect: false, // Prevent automatic redirect to catch errors
+      redirect: false,
       callbackUrl: "/dashboard",
       email,
       password,
@@ -23,23 +23,28 @@ export default function SignInForm() {
 
     setLoading(false);
 
-    // Check for response errors
+    // Log the full response for debugging
+    console.log("SignIn Response:", res);
+
+    // Check for errors and handle them more specifically
     if (res?.error) {
-      if (res.error.includes("credentials")) {
+      // Generic invalid credentials message, as we may not receive specifics
+      if (res.status === 401 || res.error.includes("credentials")) {
         setError("Invalid email or password. Please try again.");
       } else {
         setError("An unexpected error occurred. Please try again later.");
       }
     } else if (!res?.ok) {
+      // Catch-all for any other unexpected response
       setError("Unable to sign in at this time. Please check your credentials.");
     } else {
-      // Redirect manually to ensure success message
+      // Redirect manually upon success
       window.location.href = res.url || "/dashboard";
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full text-black max-w-sm mt-8">
+    <form onSubmit={handleSubmit} className="w-full max-w-sm mt-8">
       <input
         type="email"
         value={email}
