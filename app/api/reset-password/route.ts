@@ -25,82 +25,48 @@ export async function GET(req: NextRequest) {
   return NextResponse.redirect(new URL(`/auth/reset-password?email=${email}&token=${token}`, process.env.NEXTAUTH_URL).toString());
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
 
+
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get("token");
-    let email = searchParams.get("email");
-    email = email ? email.replace(/ /g, "+") : null;
+    // Parse the body from the request
+    const { newPassword, token, email } = await req.json();
 
-    const { newPassword, currentPassword } = await req.json();
-    if (!newPassword) {
+    if (!newPassword || !token || !email) {
       return NextResponse.json(
-        { message: "New password is required." },
+        { message: "New password, token, and email are required." },
         { status: 400 }
       );
     }
 
     await dbConnect();
 
-    // Case 1: Password Reset (unauthenticated, with token)
-    if (token && email) {
-      const user = await User.findOne({ email, token });
-      if (!user || !user.tokenExpiry || new Date() > user.tokenExpiry) {
-        return NextResponse.json(
-          { message: "Invalid or expired reset link." },
-          { status: 400 }
-        );
-      }
-      user.password = await bcrypt.hash(newPassword, 10);
-      user.token = null;
-      user.tokenExpiry = null;
-      await user.save();
-
-      return NextResponse.redirect(
-        new URL("/auth/signin", process.env.NEXTAUTH_URL).toString()
-      );
-    }
-
-    // Case 2: Password Update (authenticated user)
-    if (session) {
-      const user = await User.findOne({ email: session.user.email });
-      if (!user) {
-        return NextResponse.json(
-          { message: "User not found." },
-          { status: 404 }
-        );
-      }
-
-      if (
-        currentPassword &&
-        !(await bcrypt.compare(currentPassword, user.password))
-      ) {
-        return NextResponse.json(
-          { message: "Current password is incorrect." },
-          { status: 400 }
-        );
-      }
-
-      user.password = await bcrypt.hash(newPassword, 10);
-      await user.save();
-
+    // Case 1: Password Reset using token and email (unauthenticated route)
+    const user = await User.findOne({ email, token });
+    if (!user || !user.tokenExpiry || new Date() > user.tokenExpiry) {
       return NextResponse.json(
-        { message: "Password updated successfully." },
-        { status: 200 }
+        { message: "Invalid or expired reset link." },
+        { status: 400 }
       );
     }
 
-    // Unauthorized request if not authenticated and no token provided
-    return NextResponse.json(
-      { message: "Unauthorized request." },
-      { status: 401 }
+    // Hash the new password and update user record
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.token = null;
+    user.tokenExpiry = null;
+    await user.save();
+
+    console.log(`Password reset successful for user: ${email}`);
+
+    // Redirect to the sign-in page after successful reset
+    return NextResponse.redirect(
+      new URL("/auth/signin", process.env.NEXTAUTH_URL).toString()
     );
   } catch (error) {
-    console.error("Error during password reset/update:", error);
+    console.error("Error during password reset:", error);
     return NextResponse.json(
-      { message: "Password reset/update failed. Please try again." },
+      { message: "Password reset failed. Please try again." },
       { status: 500 }
     );
   }
