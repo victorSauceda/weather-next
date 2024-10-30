@@ -33,9 +33,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Handle email change for an existing user
     if (isEmailUpdate) {
-      const existingUser = await User.findOne({ email });
+      const existingUser = await User.findOne({ newEmail });
       if (existingUser) {
-        console.log("Email is already in use:", email);
+        console.log("Email is already in use:", newEmail);
         return NextResponse.json(
           { message: "Email is already in use." },
           { status: 400 }
