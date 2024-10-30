@@ -20,13 +20,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       email,
       password,
       isEmailUpdate = false,
-      newEmail = false
+      newEmail = "",
     }: {
       name: string;
       email: string;
       password?: string;
       isEmailUpdate?: boolean;
-      newEmail?: boolean;
+      newEmail?: string;
     } = await req.json();
 
     console.log("Request received:", { name, email, isEmailUpdate });
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       console.log("Verification link generated:", verificationLink);
 
       await sendgrid.send({
-        to: email,
+        to: newEmail,
         from: process.env.EMAIL_FROM as string,
         subject: "Confirm your new email address",
         html: `<p>Please confirm your new email by clicking <a href="${verificationLink}">here</a>.</p>`,
