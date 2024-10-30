@@ -8,6 +8,23 @@ import User from "../../../models/User";
 import { getServerSession } from "next-auth";
 import authOptions from "../../../lib/auth";
 
+export async function GET(req: NextRequest) {
+  // Parse the query parameters (for the initial page load when clicking the link)
+  const { searchParams } = new URL(req.url);
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
+
+  if (!token || !email) {
+    return NextResponse.json(
+      { message: "Invalid request. Missing token or email." },
+      { status: 400 }
+    );
+  }
+
+  // Return a response indicating the reset page can load
+  return NextResponse.redirect(new URL(`/auth/reset-password?email=${email}&token=${token}`, process.env.NEXTAUTH_URL).toString());
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
 
