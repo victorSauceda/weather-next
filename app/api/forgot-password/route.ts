@@ -8,6 +8,7 @@ sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "");
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const { email } = await req.json();
+  console.log({email})
 
   if (!email) {
     return NextResponse.json({ message: "Email is required" }, { status: 400 });
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const message = {
       to: email,
-      from: process.env.SEND_FROM_EMAIL as string,
+      from: process.env.EMAIL_FROM as string,
       subject: "Password Reset Request",
       html: `<p>You requested a password reset. Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
     };
