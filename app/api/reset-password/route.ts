@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     // Find the user by email and token
     console.log("Searching for user with provided email and token...");
-    const user = await User.findOne({ email, token });
+    const user = await User.findOne({ token });
     console.log("User search result:", user);
 
     // Check if the user exists and if the token is still valid
