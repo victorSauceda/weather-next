@@ -4,7 +4,20 @@ import dbConnect from "../../../lib/mongoose";
 import User from "../../../models/User";
 import { getServerSession } from "next-auth";
 import authOptions from "../../../lib/auth"; // Adjust the path to your auth config
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
+  if (!token || !email) {
+    return NextResponse.json(
+      { message: "Invalid request. Missing token or email." },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.redirect(new URL(`/auth/reset-password?email=${email}&token=${token}`, process.env.NEXTAUTH_URL).toString());
+}
 export async function POST(req: NextRequest) {
   try {
     // Fetch the session
